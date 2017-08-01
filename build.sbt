@@ -13,4 +13,4 @@ libraryDependencies += "org.scalatestplus.play" %% "scalatestplus-play" % "3.0.0
 libraryDependencies += "com.h2database" % "h2" % "1.4.194"
 libraryDependencies += jdbc
 libraryDependencies ++= Seq(evolutions, jdbc)
-libraryDependencies += "postgresql" % "postgresql" % "9.1-901-1.jdbc4"
+libraryDependencies += "org.postgresql" % "postgresql" % "42.1.2.jre6"
