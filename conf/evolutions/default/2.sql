@@ -1,8 +1,8 @@
---Users schema
+
 
 #--- !Ups
 
-CREATE TABLE chapters (
+CREATE TABLE articles (
 
   id SERIAL PRIMARY KEY ,
   shortName VARCHAR(255),
@@ -13,4 +13,4 @@ CREATE TABLE chapters (
 
 # --- !Downs
 
-DROP TABLE chapters;
+DROP TABLE articles;
