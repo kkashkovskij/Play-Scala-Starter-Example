@@ -11,4 +11,4 @@ CREATE TABLE articles (
 
 #--- !Downs
 
-DROP TABLE user;
+DROP TABLE articles;
