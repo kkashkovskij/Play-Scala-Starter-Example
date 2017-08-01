@@ -11,3 +11,6 @@ scalaVersion := "2.12.2"
 libraryDependencies += guice
 libraryDependencies += "org.scalatestplus.play" %% "scalatestplus-play" % "3.0.0" % Test
 libraryDependencies += "com.h2database" % "h2" % "1.4.194"
+libraryDependencies += jdbc
+libraryDependencies ++= Seq(evolutions, jdbc)
+libraryDependencies += "postgresql" % "postgresql" % "9.1-901-1.jdbc4"
