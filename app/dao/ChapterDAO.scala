@@ -19,13 +19,14 @@ class ChapterDAO @Inject() (protected val dbConfigProvider: DatabaseConfigProvid
   def all(): Future[Seq[Chapter]] = db.run(Chapters.result)
 
   def insert(chapter: Chapter): Future[Unit] = db.run(Chapters += chapter).map { _ => () }
-  private class ChaptersTable(tag: Tag) extends Table[Chapter] (tag, "Chapter"){
+  private class ChaptersTable(tag: Tag) extends Table[Chapter] (tag, "chapters"){
 
-    def id = column[Int]("ID", O.PrimaryKey)
-    def shortName = column[String]("SHORT NAME")
-    def fullName = column[String]("FULL NAME")
-    def text = column[String]("TEXT")
-    def parentId = column[Int]("PARENT ID")
+    def id = column[Int]("id", O.PrimaryKey)
+    def shortName = column[String]("shortname")
+    def fullName = column[String]("fullname")
+    def text = column[String]("text")
+    def parentId = column[Int]("parentid")
+
 
     def * = (id, shortName, fullName, text, parentId) <> (Chapter.tupled, Chapter.unapply)
   }

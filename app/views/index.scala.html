@@ -1,20 +1,45 @@
-@*
- * This template takes a single argument, a String containing a
- * message to display.
- *@
-@(message: String)
+@(articles: Seq[Article], chapters: Seq[Chapter])
 
-@*
- * Call the `main` template with two arguments. The first
- * argument is a `String` with the title of the page, the second
- * argument is an `Html` object containing the body of the page.
- *@
-@main("Welcome to Play") {
+@main("articles & chapters database") {
+<div>
+  <div id="articles">
+    <h2>Insert an article here:</h2>
 
-    @*
-     * Get an `Html` object by calling the built-in Play welcome
-     * template and passing a `String` message.
-     *@
-    @welcome(message, style = "scala")
+    <form action="/insert/article" method="POST">
+      <input shortName="shortName" type="text" placeholder="Short name"/>
+      <input fullName="fullName" type="text" placeholder="Full name"/>
+      <input text="text" type="text" placeholder="text"/>
+      <input parentId="parentId" type="number" placeholder="parentId"/>
+      <input type="submit"/>
+    </form>
 
+    <h2>Previously inserted cats:</h2>
+    <table>
+      <tr><th>shortName</th><th>fullName</th><th>text</th><th>parentId</th></tr>
+      @for(a <- articles){
+      <tr><td>@a.shortName</td><td>@a.fullName</td><td>@a.text</td><td>@a.parentId</td></tr>
+      }
+    </table>
+  </div>
+
+  <div id="dogs">
+    <h2>Insert chapter here:</h2>
+
+    <form action="/insert/chapter" method="POST">
+      <input shortName="shortName" type="text" placeholder="Short name"/>
+      <input fullName="fullName" type="text" placeholder="Full name"/>
+      <input text="text" type="text" placeholder="text"/>
+      <input parentId="parentId" type="number" placeholder="parentId"/>
+      <input type="submit"/>
+    </form>
+
+    <h2>Previously inserted chapters:</h2>
+    <table>
+        <tr><th>shortName</th><th>fullName</th><th>text</th><th>parentId</th></tr>
+      @for(c <- chapters){
+        <tr><td>@c.shortName</td><td>@c.fullName</td><td>@c.text</td><td>@c.parentId</td></tr>
+      }
+    </table>
+  </div>
+</div>
 }

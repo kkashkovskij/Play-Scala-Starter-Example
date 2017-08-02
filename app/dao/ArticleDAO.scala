@@ -19,13 +19,13 @@ class ArticleDAO @Inject() (protected val dbConfigProvider: DatabaseConfigProvid
 
   def insert(article: Article): Future[Unit] = db.run(Articles += article).map { _ => () }
 
-  private class ArticlesTable(tag: Tag) extends Table[Article] (tag, "Chapter"){
+  private class ArticlesTable(tag: Tag) extends Table[Article] (tag, "articles"){
 
-    def id = column[Int]("ID", O.PrimaryKey)
-    def shortName = column[String]("SHORT NAME")
-    def fullName = column[String]("FULL NAME")
-    def text = column[String]("TEXT")
-    def parentId = column[Int]("PARENT ID")
+    def id = column[Int]("id", O.PrimaryKey)
+    def shortName = column[String]("shortname")
+    def fullName = column[String]("fullname")
+    def text = column[String]("text")
+    def parentId = column[Int]("parentid")
 
     def * = (id, shortName, fullName, text, parentId) <> (Article.tupled, Article.unapply)
   }
