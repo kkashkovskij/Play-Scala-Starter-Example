@@ -7,7 +7,7 @@ CREATE TABLE articles (
   id SERIAL PRIMARY KEY ,
   shortName VARCHAR(255),
   fullName VARCHAR(255),
-  parentChapterId INTEGER REFERENCES chapters(id)
+  parentId INTEGER REFERENCES chapters(id)
 
 );
 
