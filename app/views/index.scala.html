@@ -15,9 +15,9 @@
 
     <h2>Previously inserted cats:</h2>
     <table>
-      <tr><th>shortName</th><th>fullName</th><th>text</th><th>parentId</th></tr>
+      <tr><th>shortName</th><th>fullName</th><th>text</th></tr>
       @for(a <- articles){
-      <tr><td>@a.shortName</td><td>@a.fullName</td><td>@a.text</td><td>@a.parentId</td></tr>
+      <tr><td>@a.shortName</td><td>@a.fullName</td><td>@a.text</td></tr>
       }
     </table>
   </div>
@@ -35,9 +35,9 @@
 
     <h2>Previously inserted chapters:</h2>
     <table>
-        <tr><th>shortName</th><th>fullName</th><th>text</th><th>parentId</th></tr>
+        <tr><th>shortName</th><th>fullName</th><th>text</th></tr>
       @for(c <- chapters){
-        <tr><td>@c.shortName</td><td>@c.fullName</td><td>@c.text</td><td>@c.parentId</td></tr>
+        <tr><td>@c.shortName</td><td>@c.fullName</td><td>@c.text</td></tr>
       }
     </table>
   </div>

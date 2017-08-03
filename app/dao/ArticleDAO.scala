@@ -22,7 +22,7 @@ class ArticleDAO @Inject() (protected val dbConfigProvider: DatabaseConfigProvid
   private class ArticlesTable(tag: Tag) extends Table[Article] (tag, "articles"){
 
     def id = column[Int]("id", O.PrimaryKey)
-    def shortName = column[String]("shortname")
+    def shortName = column[Option[String]]("shortname")
     def fullName = column[String]("fullname")
     def text = column[String]("text")
     def parentId = column[Int]("parentid")

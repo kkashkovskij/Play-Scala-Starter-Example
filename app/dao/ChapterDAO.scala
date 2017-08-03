@@ -22,10 +22,10 @@ class ChapterDAO @Inject() (protected val dbConfigProvider: DatabaseConfigProvid
   private class ChaptersTable(tag: Tag) extends Table[Chapter] (tag, "chapters"){
 
     def id = column[Int]("id", O.PrimaryKey)
-    def shortName = column[String]("shortname")
+    def shortName = column[Option[String]]("shortname")
     def fullName = column[String]("fullname")
-    def text = column[String]("text")
-    def parentId = column[Int]("parentid")
+    def text = column[Option[String]]("text")
+    def parentId = column[Option[Int]]("parentid")
 
 
     def * = (id, shortName, fullName, text, parentId) <> (Chapter.tupled, Chapter.unapply)
