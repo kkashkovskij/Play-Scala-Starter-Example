@@ -4,7 +4,7 @@
 
 CREATE TABLE chapters (
 
-  id SERIAL PRIMARY KEY ,
+  id SERIAL PRIMARY KEY,
   shortName VARCHAR(255),
   fullName VARCHAR(255),
   text VARCHAR(255),

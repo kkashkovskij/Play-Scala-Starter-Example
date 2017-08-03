@@ -9,11 +9,11 @@
       <input shortName="shortName" type="text" placeholder="Short name"/>
       <input fullName="fullName" type="text" placeholder="Full name"/>
       <input text="text" type="text" placeholder="text"/>
-      <input parentId="parentId" type="number" placeholder="parentId"/>
+      <input chapterId="chapterId" type="number" placeholder="chapterId"/>
       <input type="submit"/>
     </form>
 
-    <h2>Previously inserted cats:</h2>
+    <h2>Previously inserted articles:</h2>
     <table>
       <tr><th>shortName</th><th>fullName</th><th>text</th></tr>
       @for(a <- articles){
@@ -22,12 +22,12 @@
     </table>
   </div>
 
-  <div id="dogs">
+  <div id="chapters">
     <h2>Insert chapter here:</h2>
 
     <form action="/insert/chapter" method="POST">
-      <input shortName="shortName" type="text" placeholder="Short name"/>
-      <input fullName="fullName" type="text" placeholder="Full name"/>
+      <input shortName="shortName" type="text" placeholder="Shortname"/>
+      <input fullName="fullName" type="text" placeholder="Fullname"/>
       <input text="text" type="text" placeholder="text"/>
       <input parentId="parentId" type="number" placeholder="parentId"/>
       <input type="submit"/>

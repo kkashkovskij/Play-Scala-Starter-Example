@@ -42,10 +42,10 @@ class Application @Inject() (
 
   val articleForm = Form(
     mapping(
-      "short name" -> text,
-      "full name" -> text,
+      "shortName" -> text,
+      "fullName" -> text,
       "text" -> text,
-      "parent id" -> number
+      "chapterId" -> number
     )(ArticleFormModel.apply)(ArticleFormModel.unapply)
   )
 
@@ -56,13 +56,13 @@ class Application @Inject() (
 
   def insertChapter = Action.async{ implicit request =>
     val chapter: ChapterFormModel = chapterForm.bindFromRequest.get
-    chapterDao.insert(Chapter(1, trimToOption(chapter.shortName), chapter.fullName, trimToOption(chapter.text),
+    chapterDao.insert(Chapter(trimToOption(chapter.shortName), chapter.fullName, trimToOption(chapter.text),
       if(chapter.parentId == -1) None else Some(chapter.parentId) )).map(_ => Redirect(routes.Application.index))
   }
 
   def insertArticle = Action.async{ implicit request =>
     val article: ArticleFormModel = articleForm.bindFromRequest.get
-    articleDao.insert(Article(1, trimToOption(article.shortName), article.fullName, article.text,
+    articleDao.insert(Article(trimToOption(article.shortName), article.fullName, article.text,
       article.chapterId)).map(_ => Redirect(routes.Application.index))
   }
 

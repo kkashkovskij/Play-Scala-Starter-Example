@@ -8,7 +8,7 @@ CREATE TABLE articles (
   shortName VARCHAR(255),
   fullName VARCHAR(255),
   text VARCHAR(255),
-  parentId INTEGER REFERENCES chapters(id)
+  chapterId INTEGER REFERENCES chapters(id)
 
 );
 

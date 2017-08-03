@@ -25,8 +25,9 @@ class ArticleDAO @Inject() (protected val dbConfigProvider: DatabaseConfigProvid
     def shortName = column[Option[String]]("shortname")
     def fullName = column[String]("fullname")
     def text = column[String]("text")
-    def parentId = column[Int]("parentid")
+    def chapterId = column[Int]("chapterid")
 
-    def * = (id, shortName, fullName, text, parentId) <> (Article.tupled, Article.unapply)
+    def * = (shortName, fullName, text, chapterId) <> (Article.tupled, Article.unapply)
+//    def * = (id, shortName, fullName, text, parentId) <> (Article.tupled, Article.unapply)
   }
 }
