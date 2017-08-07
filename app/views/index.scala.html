@@ -1,45 +1,43 @@
-@(articles: Seq[Article], chapters: Seq[Chapter])
+@(articles: Form[ArticleFormModel], chapters: Form[ChapterFormModel], art: Seq[Article], chap: Seq[Chapter])(implicit messages:Messages,request: RequestHeader, messagesProvider: MessagesProvider)
+
+
 
 @main("articles & chapters database") {
-<div>
-  <div id="articles">
-    <h2>Insert an article here:</h2>
 
-    <form action="/insert/article" method="POST">
-      <input shortName="shortName" type="text" placeholder="Short name"/>
-      <input fullName="fullName" type="text" placeholder="Full name"/>
-      <input text="text" type="text" placeholder="text"/>
-      <input chapterId="chapterId" type="number" placeholder="chapterId"/>
-      <input type="submit"/>
-    </form>
+    @helper.form(action = routes.Application.insertArticle()) {
+        @helper.inputText(articles("shortName"))
+        @helper.inputText(articles("fullName"))
+        @helper.inputText(articles("text"))
+        @helper.inputText(articles("chapterId"))
 
-    <h2>Previously inserted articles:</h2>
-    <table>
-      <tr><th>shortName</th><th>fullName</th><th>text</th></tr>
-      @for(a <- articles){
-      <tr><td>@a.shortName</td><td>@a.fullName</td><td>@a.text</td></tr>
-      }
-    </table>
-  </div>
+        <button type="submit">Create article</button>
+    }
 
-  <div id="chapters">
-    <h2>Insert chapter here:</h2>
+    @helper.form(action = routes.Application.insertChapter()) {
+        @helper.inputText(articles("shortName"))
+        @helper.inputText(articles("fullName"))
+        @helper.inputText(articles("text"))
+        @helper.inputText(articles("parentId"))
 
-    <form action="/insert/chapter" method="POST">
-      <input shortName="shortName" type="text" placeholder="Shortname"/>
-      <input fullName="fullName" type="text" placeholder="Fullname"/>
-      <input text="text" type="text" placeholder="text"/>
-      <input parentId="parentId" type="number" placeholder="parentId"/>
-      <input type="submit"/>
-    </form>
+        <button type="submit">Create chapter</button>
+    }
 
-    <h2>Previously inserted chapters:</h2>
-    <table>
-        <tr><th>shortName</th><th>fullName</th><th>text</th></tr>
-      @for(c <- chapters){
-        <tr><td>@c.shortName</td><td>@c.fullName</td><td>@c.text</td></tr>
-      }
-    </table>
-  </div>
-</div>
+    @buildTree()
+}
+
+
+@buildTree(rootId: Int = 0) = {
+    @if(rootId != null) {
+        <ul>
+        @for(ch <- chap){
+            <li>@ch.shortName @buildTree(ch.id)</li>
+            @for(a <- art){
+                @if(a.chapterId == ch.id) {
+                    <li>@a.shortName</li>
+                }
+            }
+
+        }
+        </ul>
+    }
 }
