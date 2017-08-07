@@ -21,7 +21,7 @@ class ChapterDAO @Inject() (protected val dbConfigProvider: DatabaseConfigProvid
   def insert(chapter: Chapter): Future[Unit] = db.run(Chapters += chapter).map { _ => () }
   private class ChaptersTable(tag: Tag) extends Table[Chapter] (tag, "chapters"){
 
-    def id = column[Option[Int]]("id", O.PrimaryKey)
+    def id = column[Int]("id", O.PrimaryKey)
     def shortName = column[Option[String]]("shortname")
     def fullName = column[String]("fullname")
     def text = column[Option[String]]("text")

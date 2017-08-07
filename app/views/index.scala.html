@@ -27,17 +27,19 @@
 
 
 @buildTree(rootId: Int = 0) = {
-    @if(rootId != null) {
-        <ul>
-        @for(ch <- chap){
+
+    <ul>
+    @for(ch <- chap) {
+        @if((rootId == ch.parentId) || ((rootId == 0)&&(ch.id == null))) {
             <li>@ch.shortName @buildTree(ch.id)</li>
-            @for(a <- art){
-                @if(a.chapterId == ch.id) {
+            @for(a <- art) {
+                @if((a.chapterId == rootId)) {
                     <li>@a.shortName</li>
                 }
             }
-
         }
-        </ul>
+
     }
+    </ul>
+
 }
