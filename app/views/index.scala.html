@@ -1,4 +1,5 @@
-@(articles: Form[ArticleFormModel], chapters: Form[ChapterFormModel], art: Seq[Article], chap: Seq[Chapter])(implicit messages:Messages,request: RequestHeader, messagesProvider: MessagesProvider)
+@import scala.collection.mutable
+@(articles: Form[ArticleFormModel], chapters: Form[ChapterFormModel], art: Seq[Article], chap: Seq[Chapter], treeRoots: mutable.MutableList[TreeNode[Chapter]])(implicit messages:Messages,request: RequestHeader, messagesProvider: MessagesProvider)
 
 
 
@@ -22,24 +23,21 @@
         <button type="submit">Create chapter</button>
     }
 
-    @buildTree()
+@for(t <- treeRoots){
+    <ul>@t.getData().shortName</ul>
 }
 
 
-@buildTree(rootId: Int = 0) = {
+@*<ul>@iteration(0,1, art, chap)</ul>*@
 
-    <ul>
-    @for(ch <- chap) {
-        @if((rootId == ch.parentId) || ((rootId == 0)&&(ch.id == null))) {
-            <li>@ch.shortName @buildTree(ch.id)</li>
-            @for(a <- art) {
-                @if((a.chapterId == rootId)) {
-                    <li>@a.shortName</li>
-                }
-            }
-        }
-
-    }
-    </ul>
 
 }
+
+
+
+
+
+
+
+
+
