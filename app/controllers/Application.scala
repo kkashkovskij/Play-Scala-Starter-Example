@@ -79,8 +79,6 @@ class Application @Inject() (
       article.chapterId)).map(_ => Redirect(routes.Application.index))
   }
 
-
-
   val chaptersF: Future[Seq[Chapter]] = chapterDao.all();
   val chapters: Seq[Chapter] = Seq[Chapter]()
   chaptersF.map{case (chapters) => chapters}
@@ -131,6 +129,11 @@ class Application @Inject() (
     pathList.+=:(str)
     numbersList.+=:(num)
 
+    for(a <- n.getArticles()){
+      pathList.+=:(str + "/" + a.shortName)
+      numbersList.+=:("art:")
+    }
+
     for(c <- n.getChildren()){
       getPathList(c, str, number)
     }
@@ -141,10 +144,6 @@ class Application @Inject() (
       getPathList(root, "", "")
     }
   }
-
-
-
-
 }
 
 case class ChapterFormModel(shortName: String, fullName: String, text: String, parentId: Int)
@@ -171,6 +170,10 @@ class TreeNode[T] (data: T, parent: TreeNode[T], chapterNumber: Int, children: m
 
   def getChapterNumber(): Int = {
     this.chapterNumber
+  }
+
+  def getArticles(): mutable.MutableList[Article] = {
+    this.articleList
   }
 }
 
