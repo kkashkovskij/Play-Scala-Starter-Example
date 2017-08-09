@@ -28,7 +28,7 @@
 
     @for(s <- pathList){
 
-        <ul><a href='@routes.Application.info(s)'> @pathMap.get(s)</a>  </ul>
+        <ul><a href='@routes.Application.info(s)'> @pathMap.get(s)</a>  <a href='@routes.Application.delete(s)'>[x]</a></ul>
     }
 
 

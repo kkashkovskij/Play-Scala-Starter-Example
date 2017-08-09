@@ -16,6 +16,7 @@ GET     /assets/*file               controllers.Assets.versioned(path="/public",
 
 GET     /                           controllers.Application.index
 GET     /info                           controllers.Application.info(s: String)
+GET    /delete                        controllers.Application.delete(s: String)
 
 
 

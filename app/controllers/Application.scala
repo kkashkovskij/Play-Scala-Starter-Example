@@ -29,9 +29,14 @@ class Application @Inject() (
     articleDao.all().zip(chapterDao.all()).map { case (articles, chapters) => {
 
 
-      getFromdb()
-      setTreeNodes(null, 1)
-      getAllPath()
+        pathList.clear()
+        pathMap.clear()
+        numbersList.clear()
+        treeRoots.clear()
+        getFromdb()
+        setTreeNodes(null, 1)
+        getAllPath()
+
 
       Ok(views.html.index(articleForm, chapterForm, pathList, pathMap))} }
   }
@@ -45,7 +50,13 @@ class Application @Inject() (
         Ok(views.html.info(s,fullName,text, children))
   }
 
-//  def delete(id: Int, elType: String) = TODO
+  def delete(s: String) = Action{
+
+        if (pathMap.get(s).orNull.getType == "chapter") chapterDao.delete(pathMap.get(s).orNull.getId)
+        else if (pathMap.get(s).orNull.getType == "article") articleDao.delete(pathMap.get(s).orNull.getId)
+
+    Redirect(routes.Application.index)
+  }
 
   val chapterForm :Form[ChapterFormModel] = Form(
     mapping(
@@ -95,13 +106,14 @@ class Application @Inject() (
   var numbersList: mutable.MutableList[String] = new mutable.MutableList[String]()
   var pathList: mutable.MutableList[String] = new mutable.MutableList[String]()
   var pathMap: mutable.HashMap[String, Entity] = new mutable.HashMap[String, Entity]()
+  var flag: Boolean = false
 
   def getFromdb(): Unit = {
 
-    val chaptersF: Future[Seq[Chapter]] = chapterDao.all()
-    val articlesF: Future[Seq[Article]] = articleDao.all()
-    chapters = Await.result(chaptersF, 1.second)
-    articles = Await.result(articlesF, 1.second)
+      val chaptersF: Future[Seq[Chapter]] = chapterDao.all()
+      val articlesF: Future[Seq[Article]] = articleDao.all()
+      chapters = Await.result(chaptersF, 1.second)
+      articles = Await.result(articlesF, 1.second)
 
     }
 
@@ -137,6 +149,7 @@ class Application @Inject() (
   }
 
   def getPathList(n: TreeNode, path: String, number: String): Unit = {
+
 
     var str: String = ""
     var num: String = ""
