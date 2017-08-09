@@ -3,11 +3,12 @@ package controllers
 import javax.inject.Inject
 
 import dao.{ArticleDAO, ChapterDAO}
-import models.{Article, Chapter}
+import models.{Article, Chapter, Entity}
 import play.api.data.Form
 import play.api.data.Forms.{mapping, number, text}
 import play.api.i18n.{I18nSupport, Messages}
 import play.api.mvc.{AbstractController, ControllerComponents}
+
 import scala.concurrent.duration._
 import scala.collection.mutable
 import scala.concurrent.{Await, ExecutionContext, Future}
@@ -27,13 +28,24 @@ class Application @Inject() (
       val message: String = messages("info.error")
     articleDao.all().zip(chapterDao.all()).map { case (articles, chapters) => {
 
+
       getFromdb()
       setTreeNodes(null, 1)
       getAllPath()
 
-      Ok(views.html.index(articleForm, chapterForm, pathList))} }
+      Ok(views.html.index(articleForm, chapterForm, pathList, pathMap))} }
   }
 
+  def info(s: String) = Action{implicit request =>
+    val messages: Messages = request.messages
+    val fullName: String = pathMap.get(s).orNull.getFullName
+    val text: String = pathMap.getOrElse(s, null).getText
+    val children: mutable.MutableList[String] = pathMap.getOrElse(s, null).getChildrenList
+    Redirect(routes.Application.info(s))
+        Ok(views.html.info(s,fullName,text, children))
+  }
+
+//  def delete(id: Int, elType: String) = TODO
 
   val chapterForm :Form[ChapterFormModel] = Form(
     mapping(
@@ -53,6 +65,7 @@ class Application @Inject() (
     )(ArticleFormModel.apply)(ArticleFormModel.unapply)
   )
 
+
   private def trimToOption(str: String): Option[String] = {
     val trimed =  str.trim
     if(trimed.isEmpty) None else Some(trimed)
@@ -70,16 +83,18 @@ class Application @Inject() (
   def insertArticle =
     Action.async{ implicit request =>
     val article: ArticleFormModel = articleForm.bindFromRequest.get
-    articleDao.insert(Article(trimToOption(article.shortName), article.fullName, article.text,
+    articleDao.insert(Article(1, trimToOption(article.shortName), article.fullName, article.text,
       article.chapterId)).map(_ => Redirect(routes.Application.index))
   }
 
 
+
   var chapters: Seq[Chapter] = Seq[Chapter]()
   var articles: Seq[Article] = Seq[Article]()
-  var treeRoots: mutable.MutableList[TreeNode[Chapter]] = new mutable.MutableList[TreeNode[Chapter]]()
+  var treeRoots: mutable.MutableList[TreeNode] = new mutable.MutableList[TreeNode]()
   var numbersList: mutable.MutableList[String] = new mutable.MutableList[String]()
   var pathList: mutable.MutableList[String] = new mutable.MutableList[String]()
+  var pathMap: mutable.HashMap[String, Entity] = new mutable.HashMap[String, Entity]()
 
   def getFromdb(): Unit = {
 
@@ -92,19 +107,19 @@ class Application @Inject() (
 
 
 
-  def setTreeNodes (treeNode: TreeNode[Chapter], count: Int): Unit ={
-    var bufferNode: TreeNode[Chapter] = null
+  def setTreeNodes (treeNode: TreeNode, count: Int): Unit ={
+    var bufferNode: TreeNode = null
     var i: Int = 1
 
     for(c <- chapters) {
       if (treeNode == null && c.parentId.isEmpty) {
-        bufferNode = new TreeNode[Chapter](c, null, i, new mutable.MutableList[TreeNode[Chapter]], new mutable.MutableList[Article])
+        bufferNode = new TreeNode(c, null, i, new mutable.MutableList[TreeNode], new mutable.MutableList[Article])
         setArticles(bufferNode)
         treeRoots.+=:(bufferNode)
         setTreeNodes(bufferNode, 1)
         i+=1
       } else if (treeNode!=null && (treeNode.getData().id == c.parentId.getOrElse(0))){
-        bufferNode = new TreeNode[Chapter](c, treeNode, i, new mutable.MutableList[TreeNode[Chapter]], new mutable.MutableList[Article])
+        bufferNode = new TreeNode(c, treeNode, i, new mutable.MutableList[TreeNode], new mutable.MutableList[Article])
         treeNode.addChild(bufferNode)
         setArticles(bufferNode)
         setTreeNodes(bufferNode, 1)
@@ -113,7 +128,7 @@ class Application @Inject() (
     }
   }
 
-  def setArticles(treeNode: TreeNode[Chapter]): Unit = {
+  def setArticles(treeNode: TreeNode): Unit = {
     for (a <- articles){
       if(a.chapterId == treeNode.getData().id) {
         treeNode.addArticle(a)
@@ -121,7 +136,7 @@ class Application @Inject() (
     }
   }
 
-  def getPathList(n: TreeNode[Chapter], path: String, number: String): Unit = {
+  def getPathList(n: TreeNode, path: String, number: String): Unit = {
 
     var str: String = ""
     var num: String = ""
@@ -135,9 +150,11 @@ class Application @Inject() (
 
     for(a <- n.getArticles()){
       pathList.+=:(str + "/" + a.shortName.getOrElse(""))
+      pathMap.put(str + "/" + a.shortName.getOrElse(""), a)
       numbersList.+=:("art:")
     }
     pathList.+=:(str)
+    pathMap.put(str, n)
     numbersList.+=:(num)
   }
 
@@ -146,6 +163,8 @@ class Application @Inject() (
       getPathList(root, "", "")
     }
   }
+
+
 }
 
 case class ChapterFormModel(shortName: String, fullName: String, text: String, parentId: Int)
@@ -156,17 +175,17 @@ case class ArticleFormModel(shortName: String, fullName: String, text: String, c
 
 object ArticleFormModel{}
 
-class TreeNode[T] (data: T, parent: TreeNode[T], chapterNumber: Int, children: mutable.MutableList[TreeNode[T]], articleList: mutable.MutableList[Article]){
-  def addChild(treeNode: TreeNode[T]): Unit ={
+case class TreeNode (data: Chapter, parent: TreeNode, chapterNumber: Int, children: mutable.MutableList[TreeNode], articleList: mutable.MutableList[Article]) extends Entity{
+  def addChild(treeNode: TreeNode): Unit ={
     children.+=:(treeNode)
   }
   def addArticle(article: Article): Unit ={
     articleList.+=:(article)
   }
-  def getData(): T= {
+  def getData(): Chapter= {
     data
   }
-  def getChildren(): mutable.MutableList[TreeNode[T]] = {
+  def getChildren(): mutable.MutableList[TreeNode] = {
     this.children
   }
 
@@ -177,5 +196,30 @@ class TreeNode[T] (data: T, parent: TreeNode[T], chapterNumber: Int, children: m
   def getArticles(): mutable.MutableList[Article] = {
     this.articleList
   }
+
+  def getFullName(): String = {
+    data.getFullName
+  }
+
+  override def getChildrenList: mutable.MutableList[String] = {
+    val list: mutable.MutableList[String] = new mutable.MutableList[String]()
+    for (c <- children){
+      list.+=:(c.toString)
+    }
+
+    for (a <- articleList){
+      list.+=:(a.toString)
+    }
+
+    list
+
+  }
+  override def toString: String = data.toString
+
+  override def getText: String = data.text.getOrElse("")
+
+  def getId: Int = data.getId
+
+  def getType: String = data.getType
 }
 

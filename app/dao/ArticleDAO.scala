@@ -19,6 +19,14 @@ class ArticleDAO @Inject() (protected val dbConfigProvider: DatabaseConfigProvid
 
   def insert(article: Article): Future[Unit] = db.run(Articles += article).map { _ => () }
 
+  def delete(id: Int): Unit ={
+    val q = Articles.filter(_.id === id)
+    val action = q.delete
+    val affectedRowCound: Future[Int] = db.run(action)
+    val sql = action.statements.head
+  }
+
+
   private class ArticlesTable(tag: Tag) extends Table[Article] (tag, "articles"){
 
     def id = column[Int]("id", O.PrimaryKey)
@@ -27,7 +35,10 @@ class ArticleDAO @Inject() (protected val dbConfigProvider: DatabaseConfigProvid
     def text = column[String]("text")
     def chapterId = column[Int]("chapterid")
 
-    def * = (shortName, fullName, text, chapterId) <> (Article.tupled, Article.unapply)
+    def * = (id, shortName, fullName, text, chapterId) <> (Article.tupled, Article.unapply)
 //    def * = (id, shortName, fullName, text, parentId) <> (Article.tupled, Article.unapply)
   }
+
+
+
 }

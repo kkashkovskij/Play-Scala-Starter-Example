@@ -1,7 +1,31 @@
 package models
 
+import controllers.TreeNode
 
-case class Article (shortName: Option[String], fullName: String, text: String, chapterId: Int)
+import scala.collection.mutable
+trait Entity{
+  def getFullName: String
+  def getText: String
+  def getChildrenList: mutable.MutableList[String]
+  def getId: Int
+  def getType: String
+}
 
-case class Chapter (id :Int, shortName: Option[String], fullName: String, text: Option[String], parentId: Option[Int])
+case class Article (id: Int, shortName: Option[String], fullName: String, text: String, chapterId: Int) extends Entity{
+  override def toString: String = shortName.getOrElse("")
+  def getFullName: String = fullName
+  def getText: String = text
+  def getChildrenList: mutable.MutableList[String] = null
+  def getId: Int = id
+  def getType: String = "article"
+}
+
+case class Chapter (id :Int, shortName: Option[String], fullName: String, text: Option[String], parentId: Option[Int]) extends Entity{
+  override def toString: String = shortName.getOrElse("")
+  def getFullName: String = fullName
+  def getText: String = text.getOrElse("")
+  def getChildrenList: mutable.MutableList[String] = null
+  def getId: Int = id
+  def getType: String = "chapter"
+}
 

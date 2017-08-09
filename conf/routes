@@ -15,11 +15,14 @@ GET     /assets/*file               controllers.Assets.versioned(path="/public",
 # Home page
 
 GET     /                           controllers.Application.index
+GET     /info                           controllers.Application.info(s: String)
+
 
 
 # Home page
 POST    /insert/article                controllers.Application.insertArticle
 POST    /insert/chapter                controllers.Application.insertChapter
+
 
 
 # Map static resources from the /public folder to the /assets URL path

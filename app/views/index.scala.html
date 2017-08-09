@@ -1,5 +1,8 @@
 @import scala.collection.mutable
-@(articles: Form[ArticleFormModel], chapters: Form[ChapterFormModel], pathList: mutable.MutableList[String])(implicit messages:Messages,request: RequestHeader, messagesProvider: MessagesProvider)
+@(articles: Form[ArticleFormModel],
+        chapters: Form[ChapterFormModel],
+        pathList: mutable.MutableList[String],
+        pathMap: mutable.HashMap[String, Entity])(implicit messages:Messages,request: RequestHeader, messagesProvider: MessagesProvider)
 
 
 
@@ -24,7 +27,8 @@
     }
 
     @for(s <- pathList){
-        <ul>@s</ul>
+
+        <ul><a href='@routes.Application.info(s)'> @pathMap.get(s)</a>  </ul>
     }
 
 

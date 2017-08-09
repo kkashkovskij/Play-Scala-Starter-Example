@@ -20,6 +20,14 @@ class ChapterDAO @Inject() (protected val dbConfigProvider: DatabaseConfigProvid
   def all(): Future[Seq[Chapter]] = db.run(Chapters.result)
 
   def insert(chapter: Chapter): Future[Unit] = db.run(Chapters += chapter).map { _ => () }
+
+  def delete(id: Int): Unit ={
+    val q = Chapters.filter(_.id === id)
+    val action = q.delete
+    val affectedRowCound: Future[Int] = db.run(action)
+    val sql = action.statements.head
+  }
+
   private class ChaptersTable(tag: Tag) extends Table[Chapter] (tag, "chapters"){
 
     def id = column[Int]("id", O.PrimaryKey, O.AutoInc)
