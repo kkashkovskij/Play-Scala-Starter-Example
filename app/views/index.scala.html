@@ -1,5 +1,5 @@
 @import scala.collection.mutable
-@(articles: Form[ArticleFormModel], chapters: Form[ChapterFormModel], art: Seq[Article], chap: Seq[Chapter], treeRoots: mutable.MutableList[TreeNode[Chapter]])(implicit messages:Messages,request: RequestHeader, messagesProvider: MessagesProvider)
+@(articles: Form[ArticleFormModel], chapters: Form[ChapterFormModel], pathList: mutable.MutableList[String])(implicit messages:Messages,request: RequestHeader, messagesProvider: MessagesProvider)
 
 
 
@@ -23,9 +23,9 @@
         <button type="submit">Create chapter</button>
     }
 
-@for(t <- treeRoots){
-    <ul>@t.getData().shortName</ul>
-}
+    @for(s <- pathList){
+        <ul>@s</ul>
+    }
 
 
 @*<ul>@iteration(0,1, art, chap)</ul>*@

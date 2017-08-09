@@ -2,18 +2,16 @@ package controllers
 
 import javax.inject.Inject
 
-import com.fasterxml.jackson.core.TreeNode
 import dao.{ArticleDAO, ChapterDAO}
 import models.{Article, Chapter}
-import org.apache.commons.lang3.mutable.Mutable
 import play.api.data.Form
 import play.api.data.Forms.{mapping, number, text}
 import play.api.i18n.{I18nSupport, Messages}
 import play.api.mvc.{AbstractController, ControllerComponents}
-
+import scala.concurrent.duration._
 import scala.collection.mutable
 import scala.concurrent.{Await, ExecutionContext, Future}
-import scala.util.{Failure, Success, Try}
+
 
 
 class Application @Inject() (
@@ -27,17 +25,14 @@ class Application @Inject() (
   def index = Action.async {implicit request =>
       val messages: Messages = request.messages
       val message: String = messages("info.error")
-    articleDao.all().zip(chapterDao.all()).map { case (articles, chapters) => Ok(views.html.index(articleForm, chapterForm, articles, chapters, treeRoots)) }
+    articleDao.all().zip(chapterDao.all()).map { case (articles, chapters) => {
+
+      getFromdb()
+      setTreeNodes(null, 1)
+      getAllPath()
+
+      Ok(views.html.index(articleForm, chapterForm, pathList))} }
   }
-
-
-
-
-//def index = Action { implicit request =>
-//  val messages: Messages = request.messages
-//  val message: String = messages("info.error")
-//  Ok(views.html.index(articleForm, chapterForm, articles, chapters))
-//}
 
 
   val chapterForm :Form[ChapterFormModel] = Form(
@@ -79,15 +74,22 @@ class Application @Inject() (
       article.chapterId)).map(_ => Redirect(routes.Application.index))
   }
 
-  val chaptersF: Future[Seq[Chapter]] = chapterDao.all();
-  val chapters: Seq[Chapter] = Seq[Chapter]()
-  chaptersF.map{case (chapters) => chapters}
-  val articlesF: Future[Seq[Article]] = articleDao.all();
-  val articles: Seq[Article] = Seq[Article]()
-  articlesF.map{case (articles) => articles}
+
+  var chapters: Seq[Chapter] = Seq[Chapter]()
+  var articles: Seq[Article] = Seq[Article]()
   var treeRoots: mutable.MutableList[TreeNode[Chapter]] = new mutable.MutableList[TreeNode[Chapter]]()
   var numbersList: mutable.MutableList[String] = new mutable.MutableList[String]()
   var pathList: mutable.MutableList[String] = new mutable.MutableList[String]()
+
+  def getFromdb(): Unit = {
+
+    val chaptersF: Future[Seq[Chapter]] = chapterDao.all()
+    val articlesF: Future[Seq[Article]] = articleDao.all()
+    chapters = Await.result(chaptersF, 1.second)
+    articles = Await.result(articlesF, 1.second)
+
+    }
+
 
 
   def setTreeNodes (treeNode: TreeNode[Chapter], count: Int): Unit ={
@@ -101,7 +103,7 @@ class Application @Inject() (
         treeRoots.+=:(bufferNode)
         setTreeNodes(bufferNode, 1)
         i+=1
-      } else if (treeNode.getData().id == c.parentId.getOrElse(0)){
+      } else if (treeNode!=null && (treeNode.getData().id == c.parentId.getOrElse(0))){
         bufferNode = new TreeNode[Chapter](c, treeNode, i, new mutable.MutableList[TreeNode[Chapter]], new mutable.MutableList[Article])
         treeNode.addChild(bufferNode)
         setArticles(bufferNode)
@@ -123,20 +125,20 @@ class Application @Inject() (
 
     var str: String = ""
     var num: String = ""
-    num = num + n.getChapterNumber().toString
-    str = str + "/" + num + n.getData().shortName
-
-    pathList.+=:(str)
-    numbersList.+=:(num)
-
-    for(a <- n.getArticles()){
-      pathList.+=:(str + "/" + a.shortName)
-      numbersList.+=:("art:")
-    }
+    if (number == "") num = n.getChapterNumber().toString + "."
+    else num = number + n.getChapterNumber().toString + "."
+    str = path + "/" + num + n.getData().shortName.getOrElse("")
 
     for(c <- n.getChildren()){
-      getPathList(c, str, number)
+      getPathList(c, str, num)
     }
+
+    for(a <- n.getArticles()){
+      pathList.+=:(str + "/" + a.shortName.getOrElse(""))
+      numbersList.+=:("art:")
+    }
+    pathList.+=:(str)
+    numbersList.+=:(num)
   }
 
   def getAllPath(): Unit = {
@@ -177,53 +179,3 @@ class TreeNode[T] (data: T, parent: TreeNode[T], chapterNumber: Int, children: m
   }
 }
 
-
-//case class GeneralTree(){
-//
-//  class Node(val data: Chapter, val children: Seq[Node])
-//  class Leaf(val data: Article)
-//
-//  private val root:Node = null
-//  private var children: mutable.MutableList[Node]
-//
-//  def preorder(visit: A => Unit): Unit = {
-//    def recur(n: Node): Unit = {
-//      visit(n.data)
-//      for (c <- n.children) recur(c)
-//    }
-//
-//    recur(root)
-//  }
-//
-//  def postorder(visit: A => Unit): Unit = {
-//    def recur(n: Node): Unit = {
-//      for(c <- n.children) recur(c)
-//      visit(n.data)
-//    }
-//
-//    recur(root)
-//  }
-//
-//  def height(n:Node): Int = {
-//    1 + n.children.foldLeft(-1)((h, c) => h max height(c))
-//  }
-//
-//  def size (n: Node): Int = {
-//    n.children.foldLeft(0)((s,c) => s+size(c))
-//  }
-//
-//  def setChildren (chapters: Seq[Chapter], node: Node): Unit ={
-//
-//    for (c <- chapters){
-//      if (c.parentId.isEmpty){
-//        rootChildren.+=:(new Node(c, null))
-//
-//      }
-//      root = new Node(new Chapter(), rootChildren)
-//    }
-//  }
-//}
-//
-//object GeneralTree{
-//
-//}
