@@ -3,7 +3,8 @@
 @(path: String,
         fullName: String,
         text: String,
-        childrenList: mutable.MutableList[String])(implicit messages:Messages,request: RequestHeader, messagesProvider: MessagesProvider)
+        childrenList: mutable.MutableList[String],
+        modify: Form[ModifyForm])(implicit messages:Messages,request: RequestHeader, messagesProvider: MessagesProvider)
 
 
 <!DOCTYPE html>
@@ -25,6 +26,14 @@
             @for(c <- childrenList){
                 <ul>@c</ul>
             }
+        }
+
+        @helper.form(action = routes.Application.modify(path)) {
+            @helper.inputText(modify("shortName"))
+            @helper.inputText(modify("fullName"))
+            @helper.inputText(modify("text"))
+
+            <button type="submit">Modify</button>
         }
 
         @* And here's where we render the `Html` object containing

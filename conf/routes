@@ -23,6 +23,7 @@ GET    /delete                        controllers.Application.delete(s: String)
 # Home page
 POST    /insert/article                controllers.Application.insertArticle
 POST    /insert/chapter                controllers.Application.insertChapter
+POST    /modify                        controllers.Application.modify(s: String)
 
 
 

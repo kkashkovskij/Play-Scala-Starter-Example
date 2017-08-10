@@ -26,11 +26,19 @@ class ArticleDAO @Inject() (protected val dbConfigProvider: DatabaseConfigProvid
     val sql = action.statements.head
   }
 
+  def modify(id: Int, shortName: String, fullName: String, text: String): Unit = {
+
+    if (shortName != "") db.run((for { a <- Articles if a.id === id } yield a.shortName).update(shortName))
+    if (fullName != "")db.run((for { a <- Articles if a.id === id } yield a.fullName).update(fullName))
+    if (text != "")db.run((for { a <- Articles if a.id === id } yield a.text).update(text))
+
+  }
+
 
   private class ArticlesTable(tag: Tag) extends Table[Article] (tag, "articles"){
 
     def id = column[Int]("id", O.PrimaryKey, O.AutoInc)
-    def shortName = column[Option[String]]("shortname")
+    def shortName = column[String]("shortname")
     def fullName = column[String]("fullname")
     def text = column[String]("text")
     def chapterId = column[Int]("chapterid")

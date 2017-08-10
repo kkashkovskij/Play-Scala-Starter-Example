@@ -11,8 +11,8 @@ trait Entity{
   def getType: String
 }
 
-case class Article (id: Int, shortName: Option[String], fullName: String, text: String, chapterId: Int) extends Entity{
-  override def toString: String = shortName.getOrElse("")
+case class Article (id: Int, shortName: String, fullName: String, text: String, chapterId: Int) extends Entity{
+  override def toString: String = shortName
   def getFullName: String = fullName
   def getText: String = text
   def getChildrenList: mutable.MutableList[String] = null
@@ -20,10 +20,10 @@ case class Article (id: Int, shortName: Option[String], fullName: String, text: 
   def getType: String = "article"
 }
 
-case class Chapter (id :Int, shortName: Option[String], fullName: String, text: Option[String], parentId: Option[Int]) extends Entity{
-  override def toString: String = shortName.getOrElse("")
+case class Chapter (id :Int, shortName: String, fullName: String, text: String, parentId: Option[Int]) extends Entity{
+  override def toString: String = shortName
   def getFullName: String = fullName
-  def getText: String = text.getOrElse("")
+  def getText: String = text
   def getChildrenList: mutable.MutableList[String] = null
   def getId: Int = id
   def getType: String = "chapter"

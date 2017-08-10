@@ -47,13 +47,25 @@ class Application @Inject() (
     val text: String = pathMap.getOrElse(s, null).getText
     val children: mutable.MutableList[String] = pathMap.getOrElse(s, null).getChildrenList
     Redirect(routes.Application.info(s))
-        Ok(views.html.info(s,fullName,text, children))
+        Ok(views.html.info(s,fullName,text, children, modifyForm))
   }
 
   def delete(s: String) = Action{
 
         if (pathMap.get(s).orNull.getType == "chapter") chapterDao.delete(pathMap.get(s).orNull.getId)
         else if (pathMap.get(s).orNull.getType == "article") articleDao.delete(pathMap.get(s).orNull.getId)
+
+    Redirect(routes.Application.index)
+  }
+
+  def modify(s: String) = Action{implicit request =>
+
+    val mod: ModifyForm = modifyForm.bindFromRequest.get
+    val instance = pathMap.getOrElse(s, null)
+    if (instance.getType == "article")
+      articleDao.modify(instance.getId, mod.shortName, mod.fullName, mod.text)
+    else if (pathMap.get(s).getOrElse(null).getType == "chapter")
+      chapterDao.modify(instance.getId, mod.shortName, mod.fullName, mod.text)
 
     Redirect(routes.Application.index)
   }
@@ -76,6 +88,14 @@ class Application @Inject() (
     )(ArticleFormModel.apply)(ArticleFormModel.unapply)
   )
 
+  val modifyForm: Form[ModifyForm] = Form(
+    mapping(
+      "shortName" -> text,
+      "fullName" -> text,
+      "text" -> text,
+    )(ModifyForm.apply)(ModifyForm.unapply)
+  )
+
 
   private def trimToOption(str: String): Option[String] = {
     val trimed =  str.trim
@@ -85,16 +105,16 @@ class Application @Inject() (
   def insertChapter = Action.async{ implicit request =>
     val chapter: ChapterFormModel = chapterForm.bindFromRequest.get
     chapterDao.insert(
-      Chapter(1, trimToOption(chapter.shortName),
+      Chapter(1, chapter.shortName,
         chapter.fullName,
-        trimToOption(chapter.text),
+        chapter.text,
       if(chapter.parentId == -1) None else Some(chapter.parentId))).map(_ => Redirect(routes.Application.index))
   }
 
   def insertArticle =
     Action.async{ implicit request =>
     val article: ArticleFormModel = articleForm.bindFromRequest.get
-    articleDao.insert(Article(1, trimToOption(article.shortName), article.fullName, article.text,
+    articleDao.insert(Article(1, article.shortName, article.fullName, article.text,
       article.chapterId)).map(_ => Redirect(routes.Application.index))
   }
 
@@ -112,8 +132,8 @@ class Application @Inject() (
 
       val chaptersF: Future[Seq[Chapter]] = chapterDao.all()
       val articlesF: Future[Seq[Article]] = articleDao.all()
-      chapters = Await.result(chaptersF, 1.second)
-      articles = Await.result(articlesF, 1.second)
+      chapters = Await.result(chaptersF, 1.second).sortBy(_.id)
+      articles = Await.result(articlesF, 1.second).sortBy(_.id)
 
     }
 
@@ -155,15 +175,15 @@ class Application @Inject() (
     var num: String = ""
     if (number == "") num = n.getChapterNumber().toString + "."
     else num = number + n.getChapterNumber().toString + "."
-    str = path + "/" + num + n.getData().shortName.getOrElse("")
+    str = path + "/" + num + n.getData().shortName
 
     for(c <- n.getChildren()){
       getPathList(c, str, num)
     }
 
     for(a <- n.getArticles()){
-      pathList.+=:(str + "/" + a.shortName.getOrElse(""))
-      pathMap.put(str + "/" + a.shortName.getOrElse(""), a)
+      pathList.+=:(str + "/" + a.shortName)
+      pathMap.put(str + "/" + a.shortName, a)
       numbersList.+=:("art:")
     }
     pathList.+=:(str)
@@ -187,6 +207,10 @@ object ChapterFormModel{}
 case class ArticleFormModel(shortName: String, fullName: String, text: String, chapterId: Int)
 
 object ArticleFormModel{}
+
+case class ModifyForm(shortName: String, fullName: String, text: String)
+
+object ModifyForm
 
 case class TreeNode (data: Chapter, parent: TreeNode, chapterNumber: Int, children: mutable.MutableList[TreeNode], articleList: mutable.MutableList[Article]) extends Entity{
   def addChild(treeNode: TreeNode): Unit ={
@@ -229,7 +253,7 @@ case class TreeNode (data: Chapter, parent: TreeNode, chapterNumber: Int, childr
   }
   override def toString: String = data.toString
 
-  override def getText: String = data.text.getOrElse("")
+  override def getText: String = data.text
 
   def getId: Int = data.getId
 

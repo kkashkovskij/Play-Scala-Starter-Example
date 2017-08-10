@@ -28,12 +28,19 @@ class ChapterDAO @Inject() (protected val dbConfigProvider: DatabaseConfigProvid
     val sql = action.statements.head
   }
 
+  def modify(id: Int, shortName: String, fullName: String, text: String): Unit = {
+
+    if (shortName != "") db.run((for { a <- Chapters if a.id === id } yield a.shortName).update(shortName))
+    if (fullName != "")db.run((for { a <- Chapters if a.id === id } yield a.fullName).update(fullName))
+    if (text != "")db.run((for { a <- Chapters if a.id === id } yield a.text).update(text))
+  }
+
   private class ChaptersTable(tag: Tag) extends Table[Chapter] (tag, "chapters"){
 
     def id = column[Int]("id", O.PrimaryKey, O.AutoInc)
-    def shortName = column[Option[String]]("shortname")
+    def shortName = column[String]("shortname")
     def fullName = column[String]("fullname")
-    def text = column[Option[String]]("text")
+    def text = column[String]("text")
     def parentId = column[Option[Int]]("parentid")
 
 
